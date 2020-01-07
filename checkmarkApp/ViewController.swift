@@ -10,15 +10,47 @@ import UIKit
 
 var doneList: [String] = []
 
+private var groceryList = ["Milk","Beer","Juice", "Wine", "Bread", "Olive Oil", "Jam", "Muesli"]
+private let addProductsAfterRefresh = ["Beef", "Snacks", "Coffee", "Tea", "Honey", "Rice", "Pasta"]
+
+
 class ViewController: UIViewController {
 
-    private let groceryList = ["Milk","Beer","Juice", "Wine", "Bread"]
-
     private var myTableView: UITableView!
+    private var refreshControl: UIRefreshControl?
+
+    private var activityIndicator: UIActivityIndicatorView?
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         configureTableView()
+
+
+        self.refreshControl = UIRefreshControl()
+
+        if let refreshControl = refreshControl {
+            refreshControl.addTarget(self, action: #selector(pullToRefresh), for: .valueChanged)
+            myTableView.addSubview(refreshControl)
+        }
+
+        self.activityIndicator = UIActivityIndicatorView()
+    }
+
+    @objc func pullToRefresh() {
+
+        // need to add new element in groceryList array
+
+
+        let randomProduct = Int(arc4random_uniform(UInt32(addProductsAfterRefresh.count)))
+        groceryList.didRefreshToAdd(addProductsAfterRefresh[randomProduct])
+
+        myTableView.reloadData()
+
+        refreshControl?.endRefreshing()
+        activityIndicator?.stopAnimating()
+
     }
 
     func configureTableView() {
@@ -75,6 +107,8 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             tableView.cellForRow(at: indexPath)?.accessoryType = UITableViewCell.AccessoryType.none
             doneList.addOrDeleteString(productIndexCell)
 
+            myTableView.deselectRow(at: indexPath, animated: true)
+
 //            checkProduct(productIndexCell)
 
         }
@@ -94,3 +128,18 @@ extension Array where Element == String {
         }
     }
 }
+
+extension Array where Element == String {
+
+    func didRefreshToAdd(_ product: String) {
+        if groceryList.contains(product) {
+            // filter
+            print("there is yes")
+        } else {
+            groceryList.append(product)
+        }
+    }
+}
+
+
+
